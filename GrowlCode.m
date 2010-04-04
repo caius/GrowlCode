@@ -113,6 +113,7 @@ BOOL PerformSwizzle(Class c, SEL orig, SEL new)
 	}
 	
 	CodeVersion = [[[[NSBundle mainBundle] infoDictionary] objectForKey:(NSString *)kCFBundleVersionKey] intValue];
+  NSLog(@"GrowlCode loaded");
 }
 
 #pragma mark GrowlApplicationBridge delegate methods
@@ -148,6 +149,12 @@ BOOL PerformSwizzle(Class c, SEL orig, SEL new)
 	[array release];
 	
 	return dict;
+}
+
++ (BOOL) canNotify
+{
+  // Only notify if Xcode isn't the active application
+  return ! [NSRunningApplication currentApplication].active;
 }
 
 @end
@@ -233,7 +240,7 @@ BOOL PerformSwizzle(Class c, SEL orig, SEL new)
 	else if ([object isKindOfClass:NSClassFromString(@"XCPreprocessFileBuildOperation")])
 		growlName = NSLocalizedStringFromTableInBundle(preprocessingComplete, nil, bundle, @"");
 	
-	if (growlName) {
+	if (growlName && [GrowlCode canNotify]) {
 	    NSString* configString = [[@" (" stringByAppendingString:configurationName] stringByAppendingString:@")"];
 		NSString* description = [projectName stringByAppendingString:configString];
 		if (extraInfo)
